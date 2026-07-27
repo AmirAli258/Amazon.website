@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Company Analysis Report - Final Version (Responsive & Fixed Footer)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Colors --- */
+        :root {
+            --amazon-orange: #FF9900;
+            --amazon-blue: #007185;
+            --dark-bg: #131921;
+            --light-bg: #ffffff;
+            --text-color: #232f3e;
+            --footer-height: 80px; /* Define footer height for margin calculation */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--dark-bg);
+            color: rgb(255, 0, 0);
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ... (سایر استایل‌های Sidebar مشابه قبل) ... */
+        .sidebar h2 { text-align: center; color: var(--amazon-orange); margin-bottom: 25px; padding: 0 20px; font-weight: 800; }
+        .sidebar ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar li a { display: block; padding: 12px 25px; color: rgb(255, 255, 255); text-decoration: none; border-left: 4px solid transparent; transition: background-color 0.2s, border-left-color 0.2s, color 0.2s; font-size: 0.95em; font-weight: 400; }
+        .sidebar li a:hover, .sidebar li.active a { background-color: rgba(255, 255, 255, 0.1); border-left-color: var(--amazon-orange); color: var(--amazon-orange); }
+        .sidebar li.active a { font-weight: 600; }
+
+
+        /* --- Main Content Area --- */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .content {
+            margin-left: 260px; /* Offset for fixed sidebar */
+            width: calc(100% - 260px);
+            padding: 30px;
+            padding-bottom: calc(var(--footer-height) + 40px); /* Add space for fixed footer */
+            transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+
+        /* --- Header & Overview --- */
+        .header { background-color: var(--amazon-blue); color: rgb(255, 0, 0); padding: 40px; border-radius: 10px; margin-bottom: 40px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); border-bottom: 5px solid var(--amazon-orange); }
+        .header h1 { margin-top: 0; color: rgb(251, 255, 0); font-size: 2.5em; font-weight: 800; }
+        .header p { font-weight: 300; opacity: 0.9; }
+        /* ... (سایر استایل‌های Overview مشابه قبل) ... */
+        .overview-card { background-color: rgb(237, 254, 255); border-left: 6px solid var(--amazon-orange); padding: 25px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); margin-top: 30px; }
+        .overview-card h3 { color: var(--amazon-blue); margin-top: 0; border-bottom: 2px solid #ff4800; padding-bottom: 10px; }
+        .overview-card ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 20px; }
+        .overview-card li { background-color: var(--light-bg); padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9em; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+        .overview-card li strong { color: var(--text-color); }
+
+
+        /* --- Accordion Styles (Enhanced Visuals) --- */
+        .accordion-container { background-color: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); margin-bottom: 50px; border: 1px solid #e0e0e0; }
+        .accordion-item { border-bottom: 1px solid #f0f0f0; }
+        .accordion-item:last-child { border-bottom: none; }
+
+        .accordion-header {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 20px 25px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+        }
+
+        .accordion-header:hover { background-color: #ededed; }
+
+        .accordion-header.active {
+            background-color: var(--amazon-blue);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .accordion-icon {
+            font-size: 1.8em;
+            transition: transform 0.3s ease;
+            font-weight: 300;
+        }
+        .accordion-header.active .accordion-icon {
+            transform: rotate(45deg);
+            color: var(--amazon-orange);
+        }
+
+        .accordion-content {
+            padding: 0 25px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+            border-left: 5px solid var(--amazon-orange);
+        }
+
+        .accordion-content p, .accordion-content dl { padding: 15px 0; margin: 0; }
+        .accordion-content dt { font-weight: 600; color: var(--amazon-blue); margin-top: 15px; padding-top: 5px; border-top: 1px dotted #eee; }
+        .accordion-content dd { margin-left: 15px; padding-bottom: 5px; }
+        .accordion-content ul { list-style-type: disc; margin-left: 20px; padding-left: 10px; }
+        .accordion-content li { padding: 3px 0; }
+
+        /* --- Footer (FIXED at Bottom of Viewport) --- */
+        .footer {
+            height: var(--footer-height);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            border-top: 2px solid var(--amazon-orange);
+            background-color: white;
+            font-size: 0.95em;
+            color: #555;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+
+            /* Fixed Positioning to keep it at the very bottom of the viewport */
+            position: fixed;
+            bottom: 0;
+            right: 0; /* Pushes it to the right */
+            left: 260px; /* Starts after the sidebar */
+            width: calc(100% - 260px); /* Takes remaining width */
+            transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+            z-index: 999;
+        }
+        .footer .author { font-size: 1.15em; font-weight: 800; color: var(--amazon-blue); margin-top: 3px; letter-spacing: 0.8px; }
+
+
+        /* --- Responsive Styles (Mobile) --- */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%); /* Hide sidebar by default */
+                position: fixed;
+                box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .content-wrapper {
+                display: block;
+            }
+
+            .content {
+                margin-left: 0; /* Content takes full width */
+                width: 100%;
+                padding-bottom: calc(var(--footer-height) + 60px); /* Adjust padding for mobile footer */
+            }
+
+            .header { padding: 25px; }
+            .header h1 { font-size: 1.8em; }
+
+            /* Mobile Footer Adjustment */
+            .footer {
+                left: 0; /* Footer spans full width */
+                width: 100%;
+                /* On mobile, we don't need to worry about sidebar offset */
+            }
+
+            /* --- Menu Button --- */
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background-color: var(--amazon-orange);
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 1.5em;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+                transition: left 0.3s ease-in-out;
+            }
+            .menu-toggle:hover { background-color: #e68a00; }
+
+            /* Adjust Menu button position when sidebar is open */
+            body.sidebar-open .menu-toggle {
+                 left: 270px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Menu Toggle Button for Mobile -->
+    <button class="menu-toggle" aria-label="Toggle Menu">&#9776;</button>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <h2>AMAZON REPORT</h2>
+        <ul>
+            <li id="nav-overview"><a href="#section-overview">Overview</a></li>
+            <li id="nav-specifications"><a href="#section-specifications">1. Specifications</a></li>
+            <li id="nav-company_manager"><a href="#section-company_manager">2. Company Manager</a></li>
+            <li id="nav-founders"><a href="#section-founders">3. Founders</a></li>
+            <li id="nav-chairman_of_the_board_of_directors"><a href="#section-chairman_of_the_board_of_directors">4. Board Directors</a></li>
+            <li id="nav-affiliated_companies"><a href="#section-affiliated_companies">5. Affiliated Companies</a></li>
+            <li id="nav-branchs"><a href="#section-branchs">6. Global Branches</a></li>
+            <li id="nav-the_first_shop_in_person"><a href="#section-the_first_shop_in_person">7. First Physical Shop</a></li>
+            <li id="nav-amazon_impact_on_the_economy"><a href="#section-amazon_impact_on_the_economy">8. Economy Impact</a></li>
+            <li id="nav-amazon_impact_on_the_environment"><a href="#section-amazon_impact_on_the_environment">9. Environment Impact</a></li>
+            <li id="nav-the_most_important_ways_to_sell_on_amazon"><a href="#section-the_most_important_ways_to_sell_on_amazon">10. Selling Ways</a></li>
+            <li id="nav-amazon_enculturation"><a href="#section-amazon_enculturation">11. Enculturation</a></li>
+            <li id="nav-organizational_culture_of_amazon"><a href="#section-organizational_culture_of_amazon">12. Organizational Culture</a></li>
+            <li id="nav-amazon_role_in_education"><a href="#section-amazon_role_in_education">13. Role in Education</a></li>
+            <li id="nav-amazon_business_department"><a href="#section-amazon_business_department">14. Business Depts</a></li>
+            <li id="nav-amazon_seller_central"><a href="#section-amazon_seller_central">15. Seller Central</a></li>
+            <li id="nav-amazon_buyers_section"><a href="#section-amazon_buyers_section">16. Buyers Section</a></li>
+            <li id="nav-amazon_developers_division"><a href="#section-amazon_developers_division">17. Developers Division</a></li>
+            <li id="nav-amazon_web_services"><a href="#section-amazon_web_services">18. AWS Overview</a></li>
+            <li id="nav-amazon_advertising_department"><a href="#section-amazon_advertising_department">19. Advertising Dept</a></li>
+            <li id="nav-strategy_and_innovations"><a href="#section-strategy_and_innovations">20. Strategy & Innovations</a></li>
+            <li id="nav-amazon_challenges_and_competitors"><a href="#section-amazon_challenges_and_competitors">21. Challenges & Competitors</a></li>
+            <li id="nav-amazon_technology_and_infrastructure"><a href="#section-amazon_technology_and_infrastructure">22. Tech & Infra</a></li>
+            <li id="nav-amazon_data_centers"><a href="#section-amazon_data_centers">23. Data Centers</a></li>
+            <li id="nav-amazon_cloud_infrastructure"><a href="#section-amazon_cloud_infrastructure">24. Cloud Infra</a></li>
+            <li id="nav-development_of_artificial_intelligence"><a href="#section-development_of_artificial_intelligence">25. AI Development</a></li>
+            <li id="nav-aws_ai_services"><a href="#section-aws_ai_services">26. AWS AI Services</a></li>
+            <li id="nav-applications_of_artificial_intelligence_at_amazon"><a href="#section-applications_of_artificial_intelligence_at_amazon">27. AI Applications</a></li>
+            <li id="nav-amazon_robotic_warehousing"><a href="#section-amazon_robotic_warehousing">28. Robotic Warehousing</a></li>
+            <li id="nav-amazon_research_and_development"><a href="#section-amazon_research_and_development">29. R&D</a></li>
+            <li id="nav-amazon_awards_and_honors"><a href="#section-amazon_awards_and_honors">30. Awards</a></li>
+            <li id="nav-supply_chain_management_and_logistics"><a href="#section-supply_chain_management_and_logistics">31. Supply Chain</a></li>
+            <li id="nav-human_resources_and_talent_management"><a href="#section-human_resources_and_talent_management">32. HR & Talent</a></li>
+            <li id="nav-personal_development_training_programs"><a href="#section-personal_development_training_programs">33. Training Programs</a></li>
+            <li id="nav-entrepreneurial_culture"><a href="#section-entrepreneurial_culture">34. Entrepreneurial Culture</a></li>
+            <li id="nav-welfare_programs_and_employees"><a href="#section-welfare_programs_and_employees">35. Welfare Programs</a></li>
+            <li id="nav-products_and_services"><a href="#section-products_and_services">36. Products & Services</a></li>
+            <li id="nav-electrical_and_digital_products"><a href="#section-electrical_and_digital_products">37. Electrical/Digital</a></li>
+            <li id="nav-clothing_and_accessory_products"><a href="#section-clothing_and_accessory_products">38. Clothing/Accessories</a></li>
+            <li id="nav-home_products"><a href="#section-home_products">39. Home Products</a></li>
+            <li id="nav-cosmetic_products"><a href="#section-cosmetic_products">40. Cosmetic Products</a></li>
+            <li id="nav-educational_products_and_books"><a href="#section-educational_products_and_books">41. Books & Education</a></li>
+            <li id="nav-sports_products"><a href="#section-sports_products">42. Sports Products</a></li>
+            <li id="nav-baby_products"><a href="#section-baby_products">43. Baby Products</a></li>
+            <li id="nav-automotive_products"><a href="#section-automotive_products">44. Automotive Products</a></li>
+            <li id="nav-food_products"><a href="#section-food_products">45. Food Products</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="content-wrapper">
+        <main class="content" id="main-content">
+
+            <!-- Title and Overview Section -->
+            <header class="header">
+                <h1>Amazon Company Detailed Analysis</h1>
+                <p>Comprehensive breakdown of structure, operations, and strategic initiatives, fully updated.</p>
+
+                <div class="overview-card">
+                    <h3>Key Highlights (Overview)</h3>
+                    <ul>
+                        <li><strong>Founded:</strong> 1994</li>
+                        <li><strong>Company Manager:</strong> Andy Jassy</li>
+                        <li><strong>Founder:</strong> Jeff Bezos</li>
+                        <li><strong>Income:</strong> $514 billion</li>
+                        <li><strong>Employees:</strong> 1,298,000</li>
+                        <li><strong>Type:</strong> Common Stock</li>
+                        <li><strong>Scope:</strong> Global</li>
+                    </ul>
+                </div>
+            </header>
+
+            <div class="accordion-container" id="main-accordion">
+                <!-- Accordion Items will be populated here by JS -->
+            </div>
+
+            <!-- Placeholder to ensure content pushes footer up if needed -->
+            <div style="height: 50px;"></div>
+
+        </main>
+
+        <!-- Footer (FIXED) -->
+        <footer class="footer">
+            <p>&copy; 2026 Amazon Data Analysis Report. All rights reserved.</p>
+            <p class="author">Developed by: Amirali Bagheri</p>
+        </footer>
+    </div>
+
+
+    <!-- JavaScript for Accordion Functionality, Scroll Spy, and Mobile Menu -->
+    <script>
+        // Mock Data Structure (Retrieved from previous context)
+        const amazon_company = {
+            "specifications": [{"fullname":"Amazon","founded":1994,"company_manager":"Andy Jassy","founders":"Jeff Bezos","central_office":["Seattle", "Washington", "United States of America"],"number_of_employees":1298000,"website":"amazon.com","income":"$514 billion"}],
+            "company_manager": [{"fullname":"Andrew R. Jassy","age":57,"birthdate":1968,"education":"Senior Business Management","cause_of_fame":"Founder of Amazon Music and Amazon Web Services"}],
+            "founders": [{ "fullname":"Jeff Bezos", "education":"Computer science engineering", "cause_of_fame":"Founding of Amazon and Blue Origin" }, { "fullname":"Capital Group", "founded":1931, "business_context":"Financial services" }],
+            "chairman_of_the_board_of_directors": [ { "fullname":"Jeff Bezos" }, { "fullname":"Keith B. Alexander" } ],
+            "affiliated_companies": [ {"amazon_web_services": {"founded": 2006, "website_type": ["Cloud Computing"]}}, {"alexa": {"current_situation": "closed"}}, {"goodreads": {"current_situation": "active"}} ],
+            "branchs": [ {"name_of_the_country":"Germany", "founded":1995}, {"name_of_the_country":"Britannia", "founded":1998}, {"name_of_the_country":"Australia", "founded":2017} ],
+            "the_first_shop_in_person": [ {"name_store":"Amazon 4-star", "founded":2018, "technology":"No cashier", "products":["Books","games"]} ],
+            "amazon_impact_on_the_economy": [ {"increased_competition":"positive", "price_reduction":"positive", "market_centralism":"negative"} ],
+            "amazon_impact_on_the_environment": [ {"logistics_carbon_emissions":"negative", "investing_in_clean_energy":"positive"} ],
+            "the_most_important_ways_to_sell_on_amazon": [ {"fba_fulfillment_by_amazon": {"benefits": ["Reduced workload", "Prime use"], "disadvantages": ["Higher costs"]}}, {"fbm_fulfillment_by_merchant": {"benefits": ["More control"], "disadvantages": ["More workload"]}}, {"private_label": {"benefits": ["Proprietary brand"], "disadvantages": ["Intense competition"]}} ],
+            "amazon_enculturation": [ {"main_components": ["Customer focus", "long-term thinking"], "features": ["Boldness", "customer centricity"]} ],
+            "organizational_culture_of_amazon": [ {"benefits": ["Focus on innovation"], "disadvantages": ["High work pressure"]} ],
+            "amazon_role_in_education": [ {"skills_development_and_professional_training": ["Career choice program"], "cooperation_with_university": ["scholarships"]} ],
+            "amazon_business_department": [ {"sections": ["Sellers", "buyers"], "advantages": ["Global market access"]} ],
+            "amazon_seller_central": [ {"advantages": ["Increase sales"], "disadvantages": ["High competition"]} ],
+            "amazon_buyers_section": [ {"advantages": ["Diversity and global reach"], "disadvantages": ["Shipping costs"]} ],
+            "amazon_developers_division": [ {"advantages": ["Scalability", "Flexibility"], "disadvantages": ["Cost", "complexity"]} ],
+            "amazon_web_services": [ {"advantages": ["flexibility","reliability"], "amazon_ec2 ": {"advantages": ["High adoption"]}}, {"amazon_s3": {"advantages": ["Cost-effectiveness"], "disadvantages": ["Management complexity"]}} ],
+            "amazon_advertising_department": [ {"main_features": ["Sponsored Products", "Amazon DSP"], "advantages": ["Precise Targeting"]} ],
+            "strategy_and_innovations": [ {"key_strategies": ["Obsessive customer orientation"], "social_responsibility": ["Environmentally sustainable programs"]} ],
+            "amazon_challenges_and_competitors": [ {"main_challenges": ["Intense platform competition"], "retail_competitors": ["Walmart", "Alibaba"]} ],
+            "amazon_technology_and_infrastructure": [ {"highlights": ["Cloud infrastructure", "AI"]} ],
+            "amazon_data_centers": [ {"emphasis": ["affordability", "reliability"], "disadvantages": ["Complexity in management"]} ],
+            "amazon_cloud_infrastructure": [ {"components": ["virtual servers", "databases"], "advantages": ["Cost reduction"]} ],
+            "development_of_artificial_intelligence": [ {"covers": ["Nova model", "Voice UI"]} ],
+            "aws_ai_services": [ {"services": ["Amazon SageMaker", "Comprehend"], "concerns": ["privacy issues"]} ],
+            "applications_of_artificial_intelligence_at_amazon": [ {"use_cases": ["recommendations", "fraud detection"]} ],
+            "amazon_robotic_warehousing": [ {"advantages": ["speed and efficiency"], "challenges": ["ethical challenges"]} ],
+            "amazon_research_and_development": [ {"focus": ["logistics", "customer experience"]} ],
+            "amazon_awards_and_honors": [ {"owner_honors": ["Top business leader"], "appreciation_title": ["Leading the way in online retail"]} ],
+            "supply_chain_management_and_logistics": [ {"components": ["Warehouses", "advanced technology"], "disadvantages": ["high operating costs"]} ],
+            "human_resources_and_talent_management": [ {"features": ["Mass/rapid hiring"], "disadvantages": ["Competitive pressure"]} ],
+            "personal_development_training_programs": [ {"advantages": ["Increasing productivity"], "specialized_courses": ["Robotics"]} ],
+            "entrepreneurial_culture": [ {"key_principles": ["Leadership", "innovation"], "disadvantages": ["High work pressure"]} ],
+            "welfare_programs_and_employees": [ {"educational_programs": ["Career Choice"], "welfare_advantages": ["Health insurance"]} ],
+            "products_and_services": [ {"main_categories": ["Electronics", "Clothing"], "main_services": ["Prime", "AWS"]} ],
+            "electrical_and_digital_products": [ {"types": ["Computer components"], "disadvantages": ["High shipping costs"]} ],
+            "clothing_and_accessory_products": [ {"types": ["Casual wear"], "disadvantages": ["Problem of sizing"]} ],
+            "home_products": [ {"types": ["Decoration", "furniture"], "advantages": ["Variety"]} ],
+            "cosmetic_products": [ {"challenges": ["counterfeit or expired items"]} ],
+            "educational_products_and_books": [ {"covers": ["stationery", "art tools"]} ],
+            "sports_products": [ {"covers": ["aerobic", "fitness"]} ],
+            "baby_products": [ {"covers": ["hygiene", "toys"]} ],
+            "automotive_products": [ {"covers": ["spare parts", "accessories"]} ],
+            "food_products": [ {"covers": ["fresh produce", "packaged foods"]} ]
+        };
+
+        const accordionData = {
+            "specifications": { title: "1. Specifications", content: createContentFromData(amazon_company.specifications[0], 'specifications') },
+            "company_manager": { title: "2. Company Manager (Andy Jassy)", content: createContentFromData(amazon_company.company_manager[0], 'company_manager') },
+            "founders": { title: "3. Founders", content: createComplexContent(amazon_company.founders, 'founders') },
+            "chairman_of_the_board_of_directors": { title: "4. Board Directors", content: createComplexContent(amazon_company.chairman_of_the_board_of_directors, 'chairman_of_the_board_of_directors') },
+            "affiliated_companies": { title: "5. Affiliated Companies", content: createComplexContent(amazon_company.affiliated_companies, 'affiliated_companies') },
+            "branchs": { title: "6. Global Branches", content: createComplexContent(amazon_company.branchs, 'branchs') },
+            "the_first_shop_in_person": { title: "7. First Physical Shop (Amazon 4-star)", content: createComplexContent(amazon_company.the_first_shop_in_person, 'the_first_shop_in_person') },
+            "amazon_impact_on_the_economy": { title: "8. Economy Impact", content: createComplexContent(amazon_company.amazon_impact_on_the_economy, 'amazon_impact_on_the_economy') },
+            "amazon_impact_on_the_environment": { title: "9. Environment Impact", content: createComplexContent(amazon_company.amazon_impact_on_the_environment, 'amazon_impact_on_the_environment') },
+            "the_most_important_ways_to_sell_on_amazon": { title: "10. Key Selling Methods", content: createComplexContent(amazon_company.the_most_important_ways_to_sell_on_amazon, 'the_most_important_ways_to_sell_on_amazon') },
+            "amazon_enculturation": { title: "11. Enculturation", content: createComplexContent(amazon_company.amazon_enculturation, 'amazon_enculturation') },
+            "organizational_culture_of_amazon": { title: "12. Organizational Culture", content: createComplexContent(amazon_company.organizational_culture_of_amazon, 'organizational_culture_of_amazon') },
+            "amazon_role_in_education": { title: "13. Role in Education", content: createComplexContent(amazon_company.amazon_role_in_education, 'amazon_role_in_education') },
+            "amazon_business_department": { title: "14. Business Departments", content: createComplexContent(amazon_company.amazon_business_department, 'amazon_business_department') },
+            "amazon_seller_central": { title: "15. Seller Central", content: createComplexContent(amazon_company.amazon_seller_central, 'amazon_seller_central') },
+            "amazon_buyers_section": { title: "16. Buyers Section", content: createComplexContent(amazon_company.amazon_buyers_section, 'amazon_buyers_section') },
+            "amazon_developers_division": { title: "17. Developers Division", content: createComplexContent(amazon_company.amazon_developers_division, 'amazon_developers_division') },
+            "amazon_web_services": { title: "18. AWS Services (Detail)", content: createComplexAWSContent(amazon_company.amazon_web_services, 'amazon_web_services') },
+            "amazon_advertising_department": { title: "19. Advertising Department", content: createComplexContent(amazon_company.amazon_advertising_department, 'amazon_advertising_department') },
+            "strategy_and_innovations": { title: "20. Strategy & Innovations", content: createComplexContent(amazon_company['strategy_and_innovations'], 'strategy_and_innovations') },
+            "amazon_challenges_and_competitors": { title: "21. Challenges & Competitors", content: createComplexContent(amazon_company['amazon_challenges_and_competitors'], 'amazon_challenges_and_competitors') },
+            "amazon_technology_and_infrastructure": { title: "22. Technology & Infrastructure", content: createComplexContent(amazon_company['amazon_technology_and_infrastructure'], 'amazon_technology_and_infrastructure') },
+            "amazon_data_centers": { title: "23. Data Centers", content: createComplexContent(amazon_company['amazon_data_centers'], 'amazon_data_centers') },
+            "amazon_cloud_infrastructure": { title: "24. Cloud Infrastructure", content: createComplexContent(amazon_company['amazon_cloud_infrastructure'], 'amazon_cloud_infrastructure') },
+            "development_of_artificial_intelligence": { title: "25. AI Development", content: createComplexContent(amazon_company['development_of_artificial_intelligence'], 'development_of_artificial_intelligence') },
+            "aws_ai_services": { title: "26. AWS AI Services", content: createComplexContent(amazon_company['aws_ai_services'], 'aws_ai_services') },
+            "applications_of_artificial_intelligence_at_amazon": { title: "27. AI Applications", content: createComplexContent(amazon_company['applications_of_artificial_intelligence_at_amazon'], 'applications_of_artificial_intelligence_at_amazon') },
+            "amazon_robotic_warehousing": { title: "28. Robotic Warehousing", content: createComplexContent(amazon_company['amazon_robotic_warehousing'], 'amazon_robotic_warehousing') },
+            "amazon_research_and_development": { title: "29. R&D", content: createComplexContent(amazon_company['amazon_research_and_development'], 'amazon_research_and_development') },
+            "amazon_awards_and_honors": { title: "30. Awards & Honors", content: createComplexContent(amazon_company['amazon_awards_and_honors'], 'amazon_awards_and_honors') },
+            "supply_chain_management_and_logistics": { title: "31. Supply Chain & Logistics", content: createComplexContent(amazon_company['supply_chain_management_and_logistics'], 'supply_chain_management_and_logistics') },
+            "human_resources_and_talent_management": { title: "32. HR & Talent Management", content: createComplexContent(amazon_company['human_resources_and_talent_management'], 'human_resources_and_talent_management') },
+            "personal_development_training_programs": { title: "33. Training Programs", content: createComplexContent(amazon_company['personal_development_training_programs'], 'personal_development_training_programs') },
+            "entrepreneurial_culture": { title: "34. Entrepreneurial Culture", content: createComplexContent(amazon_company['entrepreneurial_culture'], 'entrepreneurial_culture') },
+            "welfare_programs_and_employees": { title: "35. Welfare Programs", content: createComplexContent(amazon_company['welfare_programs_and_employees'], 'welfare_programs_and_employees') },
+            "products_and_services": { title: "36. General Products & Services", content: createComplexContent(amazon_company['products_and_services'], 'products_and_services') },
+            "electrical_and_digital_products": { title: "37. Electrical & Digital", content: createComplexContent(amazon_company['electrical_and_digital_products'], 'electrical_and_digital_products') },
+            "clothing_and_accessory_products": { title: "38. Clothing & Accessories", content: createComplexContent(amazon_company['clothing_and_accessory_products'], 'clothing_and_accessory_products') },
+            "home_products": { title: "39. Home Products", content: createComplexContent(amazon_company['home_products'], 'home_products') },
+            "cosmetic_products": { title: "40. Cosmetic Products", content: createComplexContent(amazon_company['cosmetic_products'], 'cosmetic_products') },
+            "educational_products_and_books": { title: "41. Books & Education", content: createComplexContent(amazon_company['educational_products_and_books'], 'educational_products_and_books') },
+            "sports_products": { title: "42. Sports Products", content: createComplexContent(amazon_company['sports_products'], 'sports_products') },
+            "baby_products": { title: "43. Baby Products", content: createComplexContent(amazon_company['baby_products'], 'baby_products') },
+            "automotive_products": { title: "44. Automotive Products", content: createComplexContent(amazon_company['automotive_products'], 'automotive_products') },
+            "food_products": { title: "45. Food Products", content: createComplexContent(amazon_company['food_products'], 'food_products') }
+        };
+
+        // --- Helper Functions for Content Generation ---
+        function createList(items, type = 'ul') {
+            if (!items || items.length === 0) return '';
+            if (type === 'dl') {
+                let html = '<dl>';
+                items.forEach(item => {
+                    const key = Object.keys(item)[0];
+                    const value = item[key];
+                    html += `<dt>${key.replace(/_/g, ' ').toUpperCase()}:</dt><dd>${value}</dd>`;
+                });
+                html += '</dl>';
+                return html;
+            }
+
+            let html = '<ul>';
+            items.forEach(item => {
+                if (typeof item === 'string') {
+                    html += `<li>${item}</li>`;
+                } else if (typeof item === 'object') {
+                    const key = Object.keys(item)[0];
+                    html += `<li><strong>${key.replace(/_/g, ' ')}:</strong> ${item[key]}</li>`;
+                }
+            });
+            html += '</ul>';
+            return html;
+        }
+
+        function createContentFromData(data, key) {
+            let html = '';
+            if (!data) return '<p>No specific data found for this key.</p>';
+
+            Object.keys(data).forEach(prop => {
+                const value = data[prop];
+                const formattedProp = prop.replace(/_/g, ' ');
+
+                if (Array.isArray(value)) {
+                    html += `<dt>${formattedProp.toUpperCase()}:</dt><dd>${createList(value)}</dd>`;
+                } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                     html += `<dt>${formattedProp.toUpperCase()}:</dt><dd>${Array.isArray(value) ? value.join(', ') : createContentFromData(value, prop)}</dd>`;
+                }
+                else {
+                    html += `<dt>${formattedProp.toUpperCase()}:</dt><dd>${value}</dd>`;
+                }
+            });
+            return `<dl>${html}</dl>`;
+        }
+
+        function createComplexContent(dataArray, rootKey) {
+            let html = '';
+            if (!dataArray || dataArray.length === 0) return '<p>No detailed entries found.</p>';
+
+            dataArray.forEach((item, index) => {
+                if (typeof item === 'object' && item !== null) {
+                    Object.keys(item).forEach(subKey => {
+                        const subData = item[subKey];
+
+                        if (typeof subData === 'object' && subData !== null && !Array.isArray(subData) && !Array.isArray(Object.values(subData)[0])) {
+                            html += `<h4>${subKey.replace(/_/g, ' ')} Details:</h4>`;
+                            html += createContentFromData(subData, subKey);
+                        } else if (Array.isArray(subData)) {
+                            html += `<h4>${subKey.replace(/_/g, ' ')}:</h4>`;
+                            html += createList(subData);
+                        } else {
+                             html += `<dt>${subKey.replace(/_/g, ' ').toUpperCase()}:</dt><dd>${subData}</dd>`;
+                        }
+                    });
+                } else if (Array.isArray(item)) {
+                    html += createList(item);
+                } else if (typeof item === 'string') {
+                    html += `<p>${item}</p>`;
+                }
+                else {
+                    html += createContentFromData(item, `${rootKey}_item_${index}`);
+                }
+            });
+            return html;
+        }
+
+        function createComplexAWSContent(dataArray, rootKey) {
+            let html = '';
+            if (!dataArray || dataArray.length === 0) return '<p>No detailed entries found.</p>';
+
+            dataArray.forEach(item => {
+                if (typeof item === 'object' && item !== null) {
+                    Object.keys(item).forEach(serviceName => {
+                        const serviceData = item[serviceName];
+
+                        html += `<div style="border: 1px solid #007185; padding: 15px; border-radius: 6px; margin-bottom: 15px; background-color: #f0ffff;">`;
+                        html += `<h5>AWS Service: ${serviceName.replace(/ /g, '').toUpperCase()}</h5>`;
+
+                        if (typeof serviceData === 'object' && serviceData !== null) {
+                            Object.keys(serviceData).forEach(prop => {
+                                const value = serviceData[prop];
+                                if (Array.isArray(value)) {
+                                    html += `<dt>${prop.replace(/_/g, ' ')}:</dt><dd>${createList(value)}</dd>`;
+                                } else {
+                                    html += `<dt>${prop.replace(/_/g, ' ')}:</dt><dd>${value}</dd>`;
+                                }
+                            });
+                        }
+                        html += `</div>`;
+                    });
+                }
+            });
+            return html;
+        }
+
+        // --- Accordion Initialization ---
+        const accordionContainer = document.getElementById('main-accordion');
+        let htmlContent = '';
+
+        Object.keys(accordionData).forEach(key => {
+            const data = accordionData[key];
+            const sectionId = `section-${key}`;
+            const headerId = `header-${key}`;
+
+            htmlContent += `
+                <div class="accordion-item">
+                    <button class="accordion-header" id="${headerId}" aria-controls="${sectionId}" aria-expanded="false">
+                        <span>${data.title}</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-content" id="${sectionId}" role="region" aria-labelledby="${headerId}">
+                        ${data.content}
+                    </div>
+                </div>
+            `;
+        });
+
+        accordionContainer.innerHTML = htmlContent;
+
+        // --- Accordion Logic (FIXED for staying open) ---
+        const headers = document.querySelectorAll(".accordion-header");
+
+        headers.forEach(header => {
+            header.addEventListener("click", function() {
+                const content = this.nextElementSibling;
+                const icon = this.querySelector('.accordion-icon');
+                const currentlyOpen = this.classList.contains('active');
+
+                // 1. Close all others first
+                headers.forEach(h => {
+                    if (h !== this) {
+                        h.classList.remove('active');
+                        h.nextElementSibling.style.maxHeight = null;
+                        h.querySelector('.accordion-icon').textContent = '+';
+                    }
+                });
+
+                // 2. Toggle the current accordion
+                if (currentlyOpen) {
+                    content.style.maxHeight = null;
+                    this.classList.remove('active');
+                    icon.textContent = '+';
+                } else {
+                    this.classList.add('active');
+                    icon.textContent = '—';
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+
+        // --- Responsive Menu Toggle Logic ---
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const bodyElement = document.body;
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            bodyElement.classList.toggle('sidebar-open');
+        });
+
+        // Close sidebar when clicking outside of it
+        document.addEventListener('click', (event) => {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                bodyElement.classList.remove('sidebar-open');
+            }
+        });
+
+
+        // --- Scroll Spy Logic for Navigation Highlighting ---
+        const navLinks = document.querySelectorAll('.sidebar li a');
+        const mainContent = document.getElementById('main-content');
+
+        function getSectionOffsets() {
+            const offsets = [];
+            const allItems = mainContent.querySelectorAll('.accordion-item');
+
+            // Add Overview Section Offset
+            const overviewNav = document.getElementById('nav-overview');
+            const overviewSection = document.getElementById('section-specifications');
+            if(overviewNav && overviewSection) {
+                 offsets.push({
+                    id: overviewNav.id,
+                    top: overviewSection.offsetTop - 150, // Position slightly higher than section start
+                    sectionId: 'section-overview'
+                });
+            }
+
+            allItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const sectionId = header.getAttribute('aria-controls');
+                const top = item.getBoundingClientRect().top + window.scrollY;
+                // Construct the nav ID based on the sectionId (e.g., 'section-specifications' -> 'nav-specifications')
+                const navId = `nav-${sectionId.split('-')[1]}`;
+
+                offsets.push({
+                    id: navId,
+                    top: top,
+                    sectionId: sectionId
+                });
+            });
+            // Sort by position (top offset)
+            offsets.sort((a, b) => a.top - b.top);
+            return offsets;
+        }
+
+        let sectionOffsets = [];
+        let scrollTimeout;
+
+        function updateActiveNav() {
+            if (sectionOffsets.length === 0) {
+                sectionOffsets = getSectionOffsets();
+            }
+
+            const scrollY = window.scrollY;
+            let activeNavId = 'nav-overview';
+
+            // Loop backwards to find the first section we have passed
+            for (let i = sectionOffsets.length - 1; i >= 0; i--) {
+                const offset = sectionOffsets[i];
+                // We consider a section active if the scroll position is past its top + a buffer
+                if (scrollY >= offset.top - 180) {
+                    activeNavId = offset.id;
+                    break;
+                }
+            }
+
+            // Update active class in sidebar
+            navLinks.forEach(link => {
+                link.parentElement.classList.remove('active');
+                if (link.id === activeNavId) {
+                    link.parentElement.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(updateActiveNav, 50);
+        });
+
+        // Recalculate on load and when accordion opens/closes
+        const recalculate = () => {
+            sectionOffsets = getSectionOffsets();
+            updateActiveNav();
+        };
+
+        window.addEventListener('load', recalculate);
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                setTimeout(recalculate, 500); // Wait for transition
+            });
+        });
+
+    </script>
+</body>
+</html>
